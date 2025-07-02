@@ -1,4 +1,4 @@
-name: blog::gh_pages
+name: liliut::gh_pages
 
 on:
   # Runs on pushes targeting the default branch
