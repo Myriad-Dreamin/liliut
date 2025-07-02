@@ -1,11 +1,47 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
 ---
 
+<style>
+  .menu {
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    gap: 1rem;
+    transform: translate(-50%, -50%);
+  }
+  .menu-button {
+    padding: 0.2rem 1rem;
+    font-size: 1.5rem;
+    width: 10rem;
+    background-color: hsl(224, 100%, 85%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+  }
+</style>
 <Layout>
-	<Welcome />
+  <div style="width: 100vw; height: 100vh; overflow: hidden;">
+    <div class="menu">
+      <a
+        class="menu-button"
+        id="start"
+        href={`${import.meta.env.BASE_URL}/scene/chapter-01-scene-01.html`}
+        >开始游戏</a
+      >
+      <a class="menu-button" id="settings">设置</a>
+    </div>
+  </div>
+
+  <script></script>
 </Layout>

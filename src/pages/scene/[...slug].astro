@@ -1,0 +1,73 @@
+---
+import { render } from "astro:content";
+import { type CollectionEntry, getCollection } from "astro:content";
+
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const scenes = await getCollection("scene");
+  return scenes.map((scene) => ({
+    params: { slug: scene.id },
+    props: scene,
+  }));
+}
+type Props = CollectionEntry<"scene">;
+
+const scene = Astro.props;
+const { Content } = await render(scene);
+---
+
+<style is:global>
+  .scene-frame {
+    display: none;
+    flex: 0 auto;
+    height: fit-content;
+    padding: 2rem;
+  }
+  .scene-frame[data-active] {
+    display: block;
+  }
+  .scene {
+    display: flex;
+    flex-direction: column-reverse;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  .portrait {
+    flex: 0 auto;
+    width: fit-content;
+    height: 70vh;
+    text-align: center;
+    cursor: none;
+    overflow: hidden;
+  }
+  .portrait img {
+    width: 40%;
+    height: auto;
+    object-fit: contain;
+  }
+</style>
+<script>
+  // window onclick
+  window.addEventListener("click", (e) => {
+    // get clicked index
+    const dataActived = document.querySelector<HTMLDivElement>(
+      ".scene-frame[data-active]"
+    );
+    if (dataActived) {
+      const index = Number.parseInt(dataActived.dataset.index || "0", 10);
+      dataActived.removeAttribute("data-active");
+      const next = document.querySelector<HTMLDivElement>(
+        `.scene-frame[data-index="${index + 1}"]`
+      );
+      if (next) {
+        next.dataset.active = "";
+      }
+    }
+  });
+</script>
+
+<Layout {...{ id: scene.id }} {...scene.data}>
+  <Content />
+</Layout>
