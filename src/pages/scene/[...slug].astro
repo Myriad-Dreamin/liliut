@@ -3,6 +3,13 @@ import { render } from "astro:content";
 import { type CollectionEntry, getCollection } from "astro:content";
 
 import Layout from "../../layouts/Layout.astro";
+import fs from "node:fs/promises";
+import { generateTypstTypes } from "../../typst-types";
+
+await fs.access("./typ/typings/typst-types.typ").catch(async () => {
+  await fs.mkdir("./typ/typings", { recursive: true });
+  return fs.writeFile("./typ/typings/typst-types.typ", generateTypstTypes());
+});
 
 export async function getStaticPaths() {
   const scenes = await getCollection("scene");
@@ -27,6 +34,9 @@ const { Content } = await render(scene);
   .scene-frame[data-active] {
     display: block;
   }
+  .line {
+    user-select: none;
+  }
   .scene {
     display: flex;
     flex-direction: column-reverse;
@@ -39,7 +49,8 @@ const { Content } = await render(scene);
     width: fit-content;
     height: 70vh;
     text-align: center;
-    cursor: none;
+    cursor: default;
+    user-select: none;
     overflow: hidden;
   }
   .portrait img {
@@ -49,23 +60,47 @@ const { Content } = await render(scene);
   }
 </style>
 <script>
+  import * as it from "../../../content/scene/state.ts";
+  for (const key of Object.keys(it)) {
+    // @ts-ignore
+    window[key] = it[key];
+  }
+
   // window onclick
-  window.addEventListener("click", (e) => {
+  const nx = (first: boolean) => () => {
+    let index = 0;
+    if (first) {
+      index = Number.parseInt(localStorage.getItem("scene-index") || "0", 10);
+    }
     // get clicked index
-    const dataActived = document.querySelector<HTMLDivElement>(
-      ".scene-frame[data-active]"
-    );
-    if (dataActived) {
-      const index = Number.parseInt(dataActived.dataset.index || "0", 10);
-      dataActived.removeAttribute("data-active");
-      const next = document.querySelector<HTMLDivElement>(
-        `.scene-frame[data-index="${index + 1}"]`
+    if (!first) {
+      const dataActived = document.querySelector<HTMLDivElement>(
+        ".scene-frame[data-active]"
       );
-      if (next) {
-        next.dataset.active = "";
+      if (dataActived) {
+        index = Number.parseInt(dataActived.dataset.index || "0", 10) + 1;
+        dataActived.removeAttribute("data-active");
       }
     }
-  });
+    const next = document.querySelector<HTMLDivElement>(
+      `.scene-frame[data-index="${index}"]`
+    );
+    if (next) {
+      const script = next.dataset.script;
+      if (script) {
+        const func = new Function(script);
+        func();
+      }
+
+      next.dataset.active = "";
+      localStorage.setItem("scene-index", index.toString());
+    }
+  };
+
+  nx(true)();
+  window.addEventListener("click", nx(false));
+  // @ts-ignore
+  window.rmScene = () => localStorage.removeItem("scene-index");
 </script>
 
 <Layout {...{ id: scene.id }} {...scene.data}>
